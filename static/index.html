@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FHIR Clinical Pipeline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans p-8">
+
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <!-- Header -->
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-blue-900">Clinical Data to FHIR Pipeline</h1>
+            <p class="text-gray-500 mt-2">Upload a medical record (PDF) to extract entities and generate an HL7 FHIR R5 Bundle.</p>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
+            <form id="uploadForm" class="space-y-4">
+                <input type="file" id="pdfFile" accept="application/pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" required />
+                <button type="submit" id="submitBtn" class="bg-blue-600 text-white px-6 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors w-full">Process Document</button>
+            </form>
+            <div id="loading" class="hidden mt-4 text-blue-600 font-medium animate-pulse">Processing document via NLP pipeline...</div>
+        </div>
+
+        <!-- Results Section (Hidden by default) -->
+        <div id="resultsContainer" class="hidden space-y-8">
+            
+            <!-- Extracted Entities Table -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-100 px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800">Extracted Clinical Entities</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 text-sm border-b">
+                                <th class="p-4">Type</th>
+                                <th class="p-4">Raw Text</th>
+                                <th class="p-4">Value/Unit</th>
+                                <th class="p-4">Terminology Code</th>
+                                <th class="p-4">Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entitiesBody" class="text-sm divide-y divide-gray-200">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FHIR Bundle JSON View -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-100 px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800">Generated FHIR R5 Bundle</h2>
+                </div>
+                <div class="p-4 bg-gray-900 text-green-400 overflow-x-auto max-h-96">
+                    <pre><code id="fhirBundleView" class="text-xs font-mono"></code></pre>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('pdfFile');
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const resultsContainer = document.getElementById('resultsContainer');
+            
+            if (fileInput.files.length === 0) return;
+
+            // UI State: Loading
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50');
+            loading.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/api/v1/process-pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Failed to process document');
+                
+                const data = await response.json();
+                
+                // Populate Entities Table
+                const tbody = document.getElementById('entitiesBody');
+                tbody.innerHTML = '';
+                
+                data.entities.forEach(ent => {
+                    const codeDisplay = ent.normalized_concept 
+                        ? `<span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${ent.normalized_concept.system}: ${ent.normalized_concept.code}</span>` 
+                        : '<span class="text-gray-400">Unmapped</span>';
+                        
+                    const valDisplay = ent.value ? `${ent.value} ${ent.unit || ''}` : '-';
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-4 font-medium text-gray-900">${ent.entity_type}</td>
+                            <td class="p-4 text-gray-600">${ent.raw_text}</td>
+                            <td class="p-4 text-gray-600">${valDisplay}</td>
+                            <td class="p-4">${codeDisplay}</td>
+                            <td class="p-4 text-gray-600">${(ent.confidence * 100).toFixed(1)}%</td>
+                        </tr>
+                    `;
+                });
+
+                // Populate FHIR JSON
+                document.getElementById('fhirBundleView').textContent = JSON.stringify(data.fhir_bundle, null, 2);
+
+                // UI State: Success
+                resultsContainer.classList.remove('hidden');
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                // UI State: Reset
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50');
+                loading.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

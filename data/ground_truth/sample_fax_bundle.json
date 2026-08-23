@@ -1,0 +1,65 @@
+{
+  "patient": {
+    "name": "Eleanor Vance",
+    "dob": "1974-06-12",
+    "gender": "female"
+  },
+  "documents": [
+    {
+      "doc_id": "doc_01",
+      "type": "cover_sheet",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "doc_id": "doc_02",
+      "type": "discharge_summary",
+      "pages": [
+        2,
+        3
+      ]
+    },
+    {
+      "doc_id": "doc_03",
+      "type": "lab_report",
+      "pages": [
+        4
+      ]
+    },
+    {
+      "doc_id": "doc_04",
+      "type": "radiology_report",
+      "pages": [
+        5
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "page_num": 1,
+      "type": "cover_sheet",
+      "doc_id": "doc_01"
+    },
+    {
+      "page_num": 2,
+      "type": "discharge_summary",
+      "doc_id": "doc_02"
+    },
+    {
+      "page_num": 3,
+      "type": "discharge_summary",
+      "doc_id": "doc_02"
+    },
+    {
+      "page_num": 4,
+      "type": "lab_report",
+      "doc_id": "doc_03"
+    },
+    {
+      "page_num": 5,
+      "type": "radiology_report",
+      "doc_id": "doc_04"
+    }
+  ]
+}
