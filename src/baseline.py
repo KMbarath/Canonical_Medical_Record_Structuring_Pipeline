@@ -31,8 +31,8 @@ def run_naive_pipeline(pdf_path: str) -> Dict[str, Any]:
             
     return {
         "pipeline_type": "naive_baseline",
-        "segments_detected": 1, # Fails to segment
+        "segments_detected": 1,
         "entities_extracted": naive_entities,
-        "terminology_mapping_rate": 0.0, # Zero mapping
-        "fhir_valid": False # No FHIR structure
+        "terminology_mapping_rate": 0.0,
+        "fhir_valid": False
     }

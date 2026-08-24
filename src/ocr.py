@@ -3,9 +3,6 @@ from PIL import Image
 import io
 import pymupdf as fitz
 
-# Note for Windows: Update path if Tesseract is not in global PATH
-# pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-
 def get_page_text(page: fitz.Page) -> str:
     """Extracts digital text or falls back to Tesseract OCR for scanned faxes/images."""
     text = page.get_text().strip()

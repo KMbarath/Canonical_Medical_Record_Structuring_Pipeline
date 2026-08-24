@@ -29,7 +29,7 @@ def build_fhir_bundle(segments: List[DocumentSegment], entities: List[ExtractedE
 
     # 3. Document References for Provenance
     for seg in segments:
-        # FIXED: FHIR IDs cannot contain underscores. Convert doc_01 to doc-01.
+        
         safe_doc_id = seg.document_id.replace("_", "-") 
         entries.append({
             "fullUrl": f"urn:uuid:{safe_doc_id}",
@@ -41,7 +41,7 @@ def build_fhir_bundle(segments: List[DocumentSegment], entities: List[ExtractedE
                     "coding": [{"system": "http://loinc.org", "code": "11488-4", "display": seg.document_type}]
                 },
                 "subject": {"reference": "urn:uuid:patient-marcus-whitfield"},
-                # FIXED: 'content' is a mandatory field in FHIR DocumentReference
+                
                 "content": [{"attachment": {"title": seg.document_type}}]
             }
         })
@@ -94,7 +94,7 @@ def build_fhir_bundle(segments: List[DocumentSegment], entities: List[ExtractedE
             if ent.value:
                 if ent.value.replace('.', '', 1).isdigit():
                     res["valueQuantity"] = {"value": float(ent.value)}
-                    # FIXED: FHIR throws an error if unit is an empty string ("")
+                    
                     if ent.unit and ent.unit.strip():
                         res["valueQuantity"]["unit"] = ent.unit.strip()
                 else:

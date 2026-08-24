@@ -7,24 +7,24 @@ class Provenance(BaseModel):
     text_span: Optional[str] = None
 
 class NormalizedConcept(BaseModel):
-    system: str  # e.g., SNOMED, LOINC, RxNorm, CPT, UCUM
+    system: str  
     code: str
     display: str
 
 class ExtractedEntity(BaseModel):
     entity_id: str
-    entity_type: str  # Condition, MedicationStatement, Observation, Procedure, etc.
+    entity_type: str 
     raw_text: str
     value: Optional[str] = None
     unit: Optional[str] = None
-    status: Optional[str] = "active"  # active / discontinued
+    status: Optional[str] = "active" 
     confidence: float
-    provenance: List[Provenance]  # Changed from single item to List
+    provenance: List[Provenance] 
     normalized_concept: Optional[NormalizedConcept] = None
 
 class DocumentSegment(BaseModel):
     document_id: str
-    document_type: str  # lab_report, discharge_summary, radiology, intake_form, cover_sheet, etc.
+    document_type: str 
     pages: List[int]
     confidence: float
     is_duplicate: bool = False
