@@ -1,6 +1,6 @@
 # Canonical FHIR Clinical Extraction Pipeline
 
-A production-ready NLP pipeline that ingests unstructured medical records in PDF format, extracts clinical facts, normalizes them to standard medical terminologies, and packages the results into validated FHIR R4 bundles.
+An end-to-end clinical NLP pipeline that ingests unstructured medical records in PDF format, extracts clinical facts, normalizes them to standard medical terminologies, and packages the results into validated FHIR R4 bundles.
 
 ## Overview
 
