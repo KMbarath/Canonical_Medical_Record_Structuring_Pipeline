@@ -104,27 +104,27 @@ The pipeline is evaluated against a naive baseline and reports:
 Input: Synthetic_Medical_Record_Exercise_Whitfield 1.pdf
 Pages: 22
 
-INGESTION             PASS
-SEGMENTATION          PASS
-PERSISTENCE           PASS
-FHIR GENERATION       PASS
-FHIR VALIDATION       PASS
-EVALUATION            PASS
-REVIEW QUEUE          PASS
+- INGESTION             PASS
+- SEGMENTATION          PASS
+- PERSISTENCE           PASS
+- FHIR GENERATION       PASS
+- FHIR VALIDATION       PASS
+- EVALUATION            PASS
+- REVIEW QUEUE          PASS
 
 Entity F1:
-  Baseline: 0.350
-  Pipeline: 0.929
-  Delta:    +0.579
+  - Baseline: 0.350
+  - Pipeline: 0.929
+  - Delta:    +0.579
 
 FHIR:
-  Resources: 35
-  Valid:     35
-  Invalid:    0
-  Pass rate: 100%
+  - Resources: 35
+  - Valid:     35
+  - Invalid:    0
+  - Pass rate: 100%
 
 Review queue:
-  Pending: 9
+  - Pending: 9
 
 Overall acceptance status: PASSED
 
