@@ -99,7 +99,7 @@ The pipeline is evaluated against a naive baseline and reports:
 - Recall
 - F1 score
 
-Latest acceptance-test result:
+### Latest acceptance-test result:
 
 Input: Synthetic_Medical_Record_Exercise_Whitfield 1.pdf
 Pages: 22
