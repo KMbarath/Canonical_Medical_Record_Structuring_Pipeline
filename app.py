@@ -24,10 +24,18 @@ def startup():
 async def serve_frontend():
     return FileResponse("static/index.html")
 
+# Note: The route is still called process-pdf so we don't break your frontend JavaScript, 
+# but it now handles all documents!
 @app.post("/api/v1/process-pdf")
 async def process_pdf(file: UploadFile = File(...)):
-    if not file.filename.endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are supported.")
+    ALLOWED_EXTENSIONS = ('.pdf', '.docx', '.png', '.jpg', '.jpeg', '.xlsx', '.xls')
+    
+    # Convert filename to lowercase to safely check the extension
+    if not file.filename.lower().endswith(ALLOWED_EXTENSIONS):
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Unsupported file type. Please upload one of: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
     
     temp_path = f"temp_{file.filename}"
     try:
