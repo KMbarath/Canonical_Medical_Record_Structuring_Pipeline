@@ -1,6 +1,6 @@
 # Canonical FHIR Clinical Extraction Pipeline
 
-A production-ready NLP pipeline that ingests unstructured medical records in PDF format, extracts clinical facts, normalizes them to standard medical terminologies, and packages the results into validated FHIR R4 bundles.
+A prototype clinical NLP pipeline that ingests unstructured medical records in PDF format, extracts clinical facts, normalizes them to standard medical terminologies, and packages the results into validated FHIR R4 bundles.
 
 ## Overview
 
@@ -15,36 +15,118 @@ The pipeline preserves source-page provenance, deduplicates repeated facts, rout
 
 ## Key Features
 
-### Information Extraction
+### 1. Multi-page Clinical Document Processing
 
-Targeted clinical pattern recognition extracts raw facts from PDF text and OCR output.
+Processes medical-record PDFs page by page and extracts structured
+clinical information from heterogeneous clinical content.
 
-### Terminology Normalization
+### 2. Clinical Information Extraction
 
-Extracted entities are mapped to standard medical coding systems:
+Uses targeted clinical pattern recognition to identify:
 
-| Entity | Terminology |
-| --- | --- |
+- Conditions
+- Medications
+- Procedures
+- Laboratory results
+- Vital signs
+
+Each extracted fact retains its source-page information.
+
+### 3. Terminology Normalization
+
+Attempts to normalize extracted clinical concepts to standard
+terminologies:
+
+| Clinical Entity | Target Terminology |
+|---|---|
 | Conditions | SNOMED CT |
 | Medications | RxNorm |
 | Procedures | CPT |
-| Observations | LOINC |
+| Laboratory/Observations | LOINC |
 
-### Clinical Review Queue
+When a confident terminology mapping cannot be established, the pipeline
+retains the raw concept and routes it for human review instead of
+assigning an unreliable code.
 
-Unmapped entities and entities with confidence below `0.85` are automatically routed to a review queue. This supports human-in-the-loop validation and prevents uncertain mappings from being treated as authoritative clinical data.
+### 4. Confidence-Based Clinical Review
 
-### Canonical Deduplication
+Entities below the configured confidence threshold are placed in a
+clinical review queue.
 
-Facts found across multiple pages are merged when their canonical code and display name match. Source-page information is retained without inflating the number of stored clinical records.
+Current threshold:
 
-### FHIR Generation and Validation
+`confidence < 0.85`
 
-The pipeline builds FHIR Bundles and validates them using the `fhir.resources` models and Pydantic validation.
+Example review records include:
 
-### Evaluation Harness
+- Ketorolac 30 mg
+- Lumbosacral strain
+- CT CERVICAL SPINE
+- MRI LUMBAR SPINE
+- ROTATOR CUFF REPAIR
 
-The evaluation harness compares the advanced pipeline with a naive baseline and reports entity-level true positives, false positives, false negatives, precision, recall, and F1 metrics.
+### 5. Canonical Deduplication
+
+Repeated clinical facts across source pages are reconciled using
+canonical identifiers and normalized representations while retaining
+source-page provenance.
+
+### 6. FHIR R4 Generation and Validation
+
+The pipeline constructs FHIR R4 resources and validates the generated
+resources before accepting the output.
+
+Latest acceptance-test result:
+
+- Resources generated: 35
+- Valid resources: 35
+- Invalid resources: 0
+- FHIR validation pass rate: 100%
+
+### 7. SQLite Persistence
+
+Structured clinical entities are persisted in a normalized SQLite
+database, allowing downstream SQL-based clinical queries.
+
+### 8. Evaluation Harness
+
+The pipeline is evaluated against a naive baseline and reports:
+
+- True Positives
+- False Positives
+- False Negatives
+- Precision
+- Recall
+- F1 score
+
+### Latest acceptance-test result:
+
+Input: Synthetic_Medical_Record_Exercise_Whitfield 1.pdf
+Pages: 22
+
+- INGESTION             : PASS
+- SEGMENTATION          : PASS
+- PERSISTENCE           : PASS
+- FHIR GENERATION       : PASS
+- FHIR VALIDATION       : PASS
+- EVALUATION            : PASS
+- REVIEW QUEUE          : PASS
+
+Entity F1:
+  - Baseline: 0.350
+  - Pipeline: 0.929
+  - Delta:    +0.579
+
+FHIR:
+  - Resources: 35
+  - Valid:     35
+  - Invalid:    0
+  - Pass rate: 100%
+
+Review queue:
+  - Pending: 9
+
+Overall acceptance status: PASSED
 
 ## Project Structure
 
