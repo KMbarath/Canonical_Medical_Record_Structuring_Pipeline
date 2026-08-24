@@ -104,13 +104,13 @@ The pipeline is evaluated against a naive baseline and reports:
 Input: Synthetic_Medical_Record_Exercise_Whitfield 1.pdf
 Pages: 22
 
-- INGESTION             PASS
-- SEGMENTATION          PASS
-- PERSISTENCE           PASS
-- FHIR GENERATION       PASS
-- FHIR VALIDATION       PASS
-- EVALUATION            PASS
-- REVIEW QUEUE          PASS
+- INGESTION             : PASS
+- SEGMENTATION          : PASS
+- PERSISTENCE           : PASS
+- FHIR GENERATION       : PASS
+- FHIR VALIDATION       : PASS
+- EVALUATION            : PASS
+- REVIEW QUEUE          : PASS
 
 Entity F1:
   - Baseline: 0.350
