@@ -25,15 +25,22 @@ def expand_abbreviation(text: str) -> str:
 def normalize_condition(text: str) -> Tuple[Optional[Dict[str, Any]], float]:
     t = text.lower()
     mapping = {
-        "cervical strain": ("128262009", "Sprain of cervical spine"),
-        "radiculopathy": ("80306001", "Radiculopathy"),
-        "lumbar radiculopathy": ("GENERAL_COND", "Lumbar radiculopathy"),
-        "lumbosacral strain": ("GENERAL_COND", "Lumbosacral strain"),
-        "mechanical low back pain": ("GENERAL_COND", "Mechanical low back pain")
+        "cervical strain": ("128262009", "Sprain of cervical spine", 0.95),
+        "radiculopathy": ("80306001", "Radiculopathy", 0.95),
+        "lumbar radiculopathy": ("80306001", "Radiculopathy", 0.95),
+        "hypertension": ("38341003", "Hypertensive disorder", 0.95),
+        "diabetes": ("73211009", "Diabetes mellitus", 0.95),
+        "asthma": ("195967001", "Asthma", 0.95),
+        "hyperlipidemia": ("55822004", "Hyperlipidemia", 0.95),
+        "lumbosacral strain": ("GENERAL_COND", "Lumbosacral strain", 0.78),
+        "mechanical low back pain": ("GENERAL_COND", "Mechanical low back pain", 0.78),
+        "fracture": ("GENERAL_COND", "Fracture", 0.78),
+        "tear": ("GENERAL_COND", "Tear", 0.78),
+        "sprain": ("GENERAL_COND", "Sprain", 0.78)
     }
     for k, v in mapping.items():
         if k in t:
-            return {"system": "http://snomed.info/sct", "code": v[0], "display": v[1]}, 0.95
+            return {"system": "http://snomed.info/sct", "code": v[0], "display": v[1]}, v[2]
     return None, 0.0
 
 def normalize_medication(text: str) -> Tuple[Optional[Dict[str, Any]], float]:
@@ -74,16 +81,20 @@ def normalize_medication(text: str) -> Tuple[Optional[Dict[str, Any]], float]:
 def normalize_procedure(text: str) -> Tuple[Optional[Dict[str, Any]], float]:
     t = text.lower()
     mapping = {
-        "microdiscectomy": ("63030", "Microdiscectomy"),
-        "tfesi": ("64483", "Transforaminal epidural steroid injection"),
-        "transforaminal epidural steroid injection": ("64483", "Transforaminal epidural steroid injection"),
-        "ct cervical spine": ("GENERAL_PROC", "CT Cervical Spine"),
-        "mri lumbar spine": ("GENERAL_PROC", "MRI Lumbar Spine"),
-        "rotator cuff repair": ("GENERAL_PROC", "Rotator Cuff Repair")
+        "microdiscectomy": ("63030", "Microdiscectomy", 0.95),
+        "tfesi": ("64483", "Transforaminal epidural steroid injection", 0.95),
+        "transforaminal epidural steroid injection": ("64483", "Transforaminal epidural steroid injection", 0.95),
+        "x-ray": ("73090", "Radiologic examination", 0.95),
+        "radiograph": ("73090", "Radiologic examination", 0.95),
+        "ct ": ("GENERAL_PROC", "CT Scan", 0.80),
+        "mri ": ("GENERAL_PROC", "MRI Scan", 0.80),
+        "rotator cuff repair": ("GENERAL_PROC", "Rotator Cuff Repair", 0.80),
+        "physical therapy": ("GENERAL_PROC", "Physical Therapy", 0.80),
+        "reduction": ("GENERAL_PROC", "Reduction", 0.80)
     }
     for k, v in mapping.items():
         if k in t:
-            return {"system": "http://www.ama-assn.org/go/cpt", "code": v[0], "display": v[1]}, 0.95
+            return {"system": "http://www.ama-assn.org/go/cpt", "code": v[0], "display": v[1]}, v[2]
     return None, 0.0
 
 def normalize_observation(text: str) -> Tuple[Optional[Dict[str, Any]], float]:

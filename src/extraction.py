@@ -41,10 +41,15 @@ def extract_and_normalize(doc, segments: List[DocumentSegment]) -> Tuple[List[Ex
     valid_entities = []
     review_queue = []
     
-    generic_med_pattern = re.compile(r"\b(?!(?:Blood|Loss|With|Continue|Add|Titrate)\b)([A-Z][a-z]{3,20}(?:\s+[a-z]{3,15})?)\s+(\d+(?:\.\d+)?\s*(?:mg|mcg|g|mL|tabs|caps))\b", re.IGNORECASE)
+    generic_med_pattern = re.compile(r"\b(?!(?:Blood|Loss|With|Continue|Add|Titrate)\b)([A-Z][a-z]{3,20}(?:\s+[a-z]{3,15})?)\s+(\d+(?:/\d+)?(?:\.\d+)?\s*(?:mg|mcg|g|mL|tabs|caps))\b", re.IGNORECASE)
     generic_vital_pattern = re.compile(r"\b(BP|HR|Temperature|T)\s*[:=]?\s*(\d{2,3}(?:/\d{2,3})?|\d{2,3}\.\d+)\s*(F|C|bpm|mmHg)?\b", re.IGNORECASE)
-    explicit_conditions = re.compile(r"\b(cervical strain|lumbosacral strain|radiculopathy|lumbar radiculopathy|mechanical low back pain)\b", re.IGNORECASE)
-    explicit_procedures = re.compile(r"\b(microdiscectomy|tfesi|transforaminal epidural steroid injection|ct cervical spine|mri lumbar spine|rotator cuff repair)\b", re.IGNORECASE)
+
+    explicit_conditions = re.compile(r"\b(cervical strain|lumbosacral strain|radiculopathy|lumbar radiculopathy|mechanical low back pain|hypertension|diabetes|asthma|hyperlipidemia|osteoarthritis|fracture|tear|sprain|bursitis|arthritis)\b", re.IGNORECASE)
+    
+    explicit_procedures = re.compile(r"\b(microdiscectomy|tfesi|transforaminal epidural steroid injection|ct\s+[a-z]+|mri\s+[a-z]+|rotator cuff repair|x-ray|radiograph|physical therapy|surgery|reduction)\b", re.IGNORECASE)
+    
+    explicit_allergies = re.compile(r"\b(penicillin|sulfa|latex|iodine|peanuts|amoxicillin)\b(?:\s+allergy)?", re.IGNORECASE)
+    
     generic_condition_pattern = re.compile(r"(?:diagnosis|diagnoses|impression|assessment)\s*[:\-]?\s*\n*([A-Za-z\s,\-]{4,35})(?=\.|\n|$)", re.IGNORECASE)
     
     blocklist = {"use only", "same", "same procedure", "confirmed intraoperatively", "patient progressing well", "present illness", "at discharge", "en route", "review"}
@@ -151,6 +156,22 @@ def extract_and_normalize(doc, segments: List[DocumentSegment]) -> Tuple[List[Ex
                 entity_type="Procedure",
                 raw_text=proc_name.upper(), confidence=conf,
                 provenance=[Provenance(source_document_id=doc_id, source_page=page_num, text_span=proc_name)],
+                normalized_concept=NormalizedConcept(**concept)
+            )
+            if ent.confidence >= 0.85: valid_entities.append(ent)
+            else: review_queue.append(ent)
+            
+        # --- ALLERGIES ---
+        for match in explicit_allergies.finditer(text):
+            allergy_name = match.group(1).strip()
+            concept = {"system": "http://snomed.info/sct", "code": "GENERAL_ALLERGY", "display": allergy_name.capitalize()}
+            conf = 0.80  # Forces routing to Review Queue to ensure safety
+            
+            ent = ExtractedEntity(
+                entity_id=generate_deterministic_id("AllergyIntolerance", concept["code"], concept["display"]),
+                entity_type="AllergyIntolerance",
+                raw_text=allergy_name.upper(), confidence=conf,
+                provenance=[Provenance(source_document_id=doc_id, source_page=page_num, text_span=allergy_name)],
                 normalized_concept=NormalizedConcept(**concept)
             )
             if ent.confidence >= 0.85: valid_entities.append(ent)
